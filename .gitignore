@@ -25,3 +25,6 @@ dist-ssr
 
 # Source renders — masters for the WebP exports in public/
 assets-src/
+
+# Playwright MCP screenshots
+.playwright-mcp/
