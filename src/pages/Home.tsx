@@ -1,3 +1,10 @@
+import { Opening } from '../sections/opening/Opening'
+
 export function Home() {
-  return <main className="min-h-svh" />
+  return (
+    <>
+      <Opening />
+      <main className="min-h-[150svh] bg-bone" />
+    </>
+  )
 }

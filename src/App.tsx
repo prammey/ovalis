@@ -4,6 +4,7 @@ import { PageTransitions } from './lib/navigation'
 import { ScrollReset, SmoothScrollProvider } from './lib/smoothScroll'
 import { Home } from './pages/Home'
 import { NotFound } from './pages/NotFound'
+import { OpeningTest } from './pages/test/OpeningTest'
 import { Placeholder } from './pages/test/Placeholder'
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/test/placeholder" element={<Placeholder />} />
+            <Route path="/test/opening" element={<OpeningTest />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </PageTransitions>
