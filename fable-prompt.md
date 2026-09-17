@@ -57,8 +57,8 @@ Use CSS custom properties. These are the whole palette; do not introduce new hue
 ## 3. Typography
 
 - **Display:** Fraunces (variable). Set `font-variation-settings: "SOFT" 100, "WONK" 1` for the soft, slightly irregular character. Italic for emotional lines.
-- **Body:** Geist, weight 300–400.
-- **Technical:** Geist Mono for spec labels, colorway codes, and the exploded-view annotations.
+- **Body:** Inter, weight 300 (Light).
+- **Technical:** JetBrains Mono for spec labels, colorway codes, and the exploded-view annotations.
 
 Load from Google Fonts. Body copy at 16–17px with generous line height, measure under 68 characters. Let the serif carry all the emphasis; the sans stays quiet.
 
@@ -95,7 +95,7 @@ Build one component, `<ProductShot colorway={...} />`, used for every appearance
 
 Today only the landing page passes an explicit src (the Midnight Navy shot, as the `herospeaker` 1x/2x `srcset` pair above). `<ProductShot>` therefore accepts an optional `srcSet` alongside `src`; when the remaining colorway renders arrive they should be exported at the same two widths and passed the same way. All nineteen colorway slots fall through to placeholders, including `foundations-navy` on its own product page. That is expected. Those pages must still look deliberate.
 
-The fallback is an inline SVG of the product's silhouette: a tilted ellipse on a flared pedestal foot, filled in that colorway's own hex, with a slightly darker inset ellipse for the grille and a soft highlight along the upper-left rim. Same aspect ratio and same position as a real render, so nothing reflows when images arrive. Add a small Geist Mono caption beneath in `--slate` reading the finish name.
+The fallback is an inline SVG of the product's silhouette: a tilted ellipse on a flared pedestal foot, filled in that colorway's own hex, with a slightly darker inset ellipse for the grille and a soft highlight along the upper-left rim. Same aspect ratio and same position as a real render, so nothing reflows when images arrive. Add a small JetBrains Mono caption beneath in `--slate` reading the finish name.
 
 Never render a grey box, a broken-image icon, a spinner that never resolves, or the word "placeholder". Someone browsing the collections page today should read those as stylised illustrations, not as missing assets. The bar: a stranger should not be able to tell which finishes have real renders and which don't without looking closely.
 
@@ -137,7 +137,7 @@ One template, driven by the colorway data below.
 
 ### Test Pages (navbar dropdown)
 A dropdown listing experimental pages. Build at least these, and add any others you think are worth showing:
-- `/test/exploded` — an SVG technical drawing of the speaker's internal components separating along a scroll-driven timeline, with thin leader lines and Geist Mono annotations. Line art on bone, no 3D.
+- `/test/exploded` — an SVG technical drawing of the speaker's internal components separating along a scroll-driven timeline, with thin leader lines and JetBrains Mono annotations. Line art on bone, no 3D.
 - `/test/spotlight` — cursor as a soft light that reveals fabric weave texture in a dark field
 - `/test/silence` — the restraint experiment: one line of type, vast empty space
 - `/test/typography` — the type system as a specimen sheet
