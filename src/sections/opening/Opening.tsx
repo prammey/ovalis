@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ProductShot } from '../../components/ProductShot'
 import { Wordmark } from '../../components/Wordmark'
 import {
@@ -110,8 +110,10 @@ export function Opening({ force = false }: Props) {
     return () => lenis.start()
   }, [lenis, phase])
 
-  // Navbar stays behind the navy until the hero hands off.
-  useEffect(() => {
+  // Navbar stays behind the navy until the hero hands off. Hidden in a layout
+  // effect, before the first paint: a plain effect runs after it, and the bar
+  // would show for a frame on top of the loader.
+  useLayoutEffect(() => {
     navbarStore.set({ visible: false })
     return () => navbarStore.set({ visible: true, top: 0 })
   }, [])
@@ -393,7 +395,7 @@ export function Opening({ force = false }: Props) {
               </div>
             </div>
           </div>
-          <div className="absolute right-[3vw] top-1/2 w-[58vw] -translate-y-[44%] max-md:right-[-10vw] max-md:w-[104vw]">
+          <div className="absolute right-[6vw] top-1/2 w-[58vw] -translate-y-[44%] max-md:right-[-10vw] max-md:w-[104vw]">
             <div ref={speakerRef} style={{ willChange: 'transform' }}>
               <ProductShot
                 colorway="foundations-navy"

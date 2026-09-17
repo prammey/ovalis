@@ -76,11 +76,25 @@ export function PageTransitions({ children }: { children: ReactNode }) {
  */
 export function PageFrame({ children }: { children: ReactNode }) {
   const { pathname } = useLocation()
-  return <PageEnter key={routeKey(pathname)}>{children}</PageEnter>
+  const key = routeKey(pathname)
+  // The first page of the session must not fade in: the opening sequence is
+  // its own entrance, and a running opacity animation here would give this
+  // wrapper a stacking context, trapping the loader's z-index underneath the
+  // fixed navbar. Every later page, arrived at however, fades normally —
+  // PageEnter reads `animate` only when it mounts, which is on each key change.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  return (
+    <PageEnter key={key} animate={mounted}>
+      {children}
+    </PageEnter>
+  )
 }
 
-function PageEnter({ children }: { children: ReactNode }) {
-  const [entered, setEntered] = useState(false)
+function PageEnter({ animate, children }: { animate: boolean; children: ReactNode }) {
+  const [entered, setEntered] = useState(!animate)
   return (
     <div
       className={entered ? undefined : 'page-enter'}

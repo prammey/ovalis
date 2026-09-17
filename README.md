@@ -43,7 +43,9 @@ Put `<collection>-<finish>.webp` files in `public/colorways/` (e.g. `flores-suns
 
 ## How the opening works
 
-1. **Load.** Bone field, wordmark fades up, a hairline rule scales with real progress: four `document.fonts.load()` calls, `fonts.ready`, and `img.decode()` of the hero at the srcset size the browser will actually pick. Minimum 1.2s so it doesn't strobe on a warm cache, maximum 6s so a stuck asset can never trap the user.
+1. **Load.** A clean bone field — nothing else paints first. Two things have to be right for that: `PageFrame` skips its fade on the very first page (a running opacity animation gives the wrapper a stacking context, which would trap the loader's `z-60` *beneath* the fixed navbar's `z-30`), and `Opening` hides the navbar in a **layout** effect, before the first paint rather than after it. Get either wrong and the bar and a half-faded home page flash up before the wordmark. `history.scrollRestoration` is also set to `manual`, so a reload never restores a mid-page position behind the loader.
+
+   Wordmark fades up, a hairline rule scales with real progress: four `document.fonts.load()` calls, `fonts.ready`, and `img.decode()` of the hero at the srcset size the browser will actually pick. Minimum 1.2s so it doesn't strobe on a warm cache, maximum 6s so a stuck asset can never trap the user.
 2. **Clear.** Wordmark and rule fade out in 0.4s.
 3. **Navy fill.** A 300vw × 220vh navy plane anchored below the viewport rises with `translateY` while rotating from −9° to 0°. Transform only. The edge starts angled (right side higher, as in the storyboard) and levels out as the `power3.out` ease settles.
 4. **Invitation.** "Scroll" and an arrow on a slow 2.4s sine bounce. Fades on first scroll; returns if the user comes back to the very top.
