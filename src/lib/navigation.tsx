@@ -15,11 +15,17 @@ import { routeKey } from './routes'
 
 type Go = (to: string) => void
 
-const NavigateContext = createContext<Go>(() => {})
+/**
+ * Null when there is no provider above, which lets TransitionLink fall back to
+ * an ordinary router Link instead of swallowing the click. A no-op default
+ * silently kills every link outside the provider.
+ */
+const NavigateContext = createContext<Go | null>(null)
 
 /**
- * Fades pages rather than cutting between them: a bone veil covers the old
- * page, the route changes underneath it, and the new page animates in.
+ * Supplies the fade navigation and renders the veil. Wrap everything that
+ * holds links — including the persistent chrome, which must sit inside this
+ * provider but outside PageFrame so it neither re-mounts nor fades per route.
  */
 export function PageTransitions({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
@@ -49,7 +55,7 @@ export function PageTransitions({ children }: { children: ReactNode }) {
 
   return (
     <NavigateContext.Provider value={go}>
-      <PageEnter key={routeKey(pathname)}>{children}</PageEnter>
+      {children}
       <div
         aria-hidden
         className="fixed inset-0 z-40 bg-bone"
@@ -64,10 +70,15 @@ export function PageTransitions({ children }: { children: ReactNode }) {
 }
 
 /**
- * Fades the new page in, then removes the animation. A filled opacity
- * animation would keep a stacking context on this wrapper and trap the
- * hero's z-index beneath the fixed navbar.
+ * Wraps the routed page so it fades in on each navigation. The animation is
+ * removed once it ends: a filled opacity animation would keep a stacking
+ * context here and trap the hero's z-index beneath the fixed navbar.
  */
+export function PageFrame({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation()
+  return <PageEnter key={routeKey(pathname)}>{children}</PageEnter>
+}
+
 function PageEnter({ children }: { children: ReactNode }) {
   const [entered, setEntered] = useState(false)
   return (
@@ -81,17 +92,21 @@ function PageEnter({ children }: { children: ReactNode }) {
   )
 }
 
-export function useFadeNavigate(): Go {
+export function useFadeNavigate(): Go | null {
   return useContext(NavigateContext)
 }
 
-/** A router Link that routes through the page fade. Modifier-clicks fall through to the browser. */
+/**
+ * A router Link that routes through the page fade. Modifier-clicks fall
+ * through to the browser, and with no provider above it behaves as a plain
+ * router Link — navigation still works, it just does not fade.
+ */
 export function TransitionLink({ to, onClick, ...rest }: LinkProps) {
   const go = useFadeNavigate()
   const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(e)
     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
-    if (typeof to !== 'string') return
+    if (!go || typeof to !== 'string') return
     e.preventDefault()
     go(to)
   }
