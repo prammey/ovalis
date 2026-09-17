@@ -371,10 +371,10 @@ export function Opening({ force = false }: Props) {
         aria-label="Luma-One. New-Age Noise."
       >
         <div className="absolute inset-0">
-          <div className="absolute left-[6vw] top-1/2 -translate-y-[54%] max-md:top-[22%] max-md:translate-y-0">
+          <div className="absolute left-[6vw] top-1/2 -translate-y-[54%] max-md:top-[19%] max-md:translate-y-0">
             <div
               ref={textRef}
-              className="font-display italic text-[clamp(3.9rem,17vw,19rem)] leading-[0.92]"
+              className="font-display italic text-[clamp(3.9rem,17vw,19rem)] leading-[0.92] max-md:text-[23vw]"
               style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144' }}
             >
               <div data-line={0}>
@@ -385,7 +385,7 @@ export function Opening({ force = false }: Props) {
               </div>
             </div>
           </div>
-          <div className="absolute right-[6vw] top-1/2 w-[58vw] -translate-y-[44%] max-md:right-[-4vw] max-md:top-[48%] max-md:w-[92vw] max-md:translate-y-0">
+          <div className="absolute right-[6vw] top-1/2 w-[58vw] -translate-y-[44%] max-md:right-[-5vw] max-md:top-[36%] max-md:w-[100vw] max-md:translate-y-0">
             <div ref={speakerRef} style={{ willChange: 'transform' }}>
               <ProductShot
                 colorway="foundations-navy"

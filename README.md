@@ -92,7 +92,9 @@ Put `<collection>-<finish>.webp` files in `public/colorways/` (e.g. `flores-suns
 
 Checked in a browser at 390×844 and 320×568. No horizontal scroll anywhere.
 
-The hero **stacks** below `md` rather than overlapping: there is not enough width for the type to sit beside a speaker large enough to read, and the overlapping desktop composition left only "New-A / No" visible. Type sits at 22% and the speaker at 48%, both at their own widths. The colorway dots put their collection label above rather than beside — beside, the label stole enough width to wrap a seven-finish row onto a second line and orphan a single dot — and each dot's tap target is padded out to 40px from its 22px visual. The navbar collapses to a menu sheet with the test pages divided off below a rule.
+The hero keeps the desktop's overlap on phones but rearranges it: the type sits above at `23vw` (its own phone-only size — the desktop `clamp()` is untouched) and the speaker comes up from below at `100vw`, high enough that its edge clips the tail of "Noise" the way it clips the end of "New-Age" on a wide screen. The desktop composition used as-is left only "New-A / No" readable, because at phone width there is no room for the type to sit *beside* a speaker large enough to read.
+
+Positioning it was done by measuring rather than by eye: the speaker's ink occupies 20.3–88.2% across and 11.7–93.4% down of its image box, so the box has to sit about 31px above wherever the visible disc should start. The colorway dots put their collection label above rather than beside — beside, the label stole enough width to wrap a seven-finish row onto a second line and orphan a single dot — and each dot's tap target is padded out to 40px from its 22px visual. The navbar collapses to a menu sheet with the test pages divided off below a rule.
 
 ## Needs a second pass
 
