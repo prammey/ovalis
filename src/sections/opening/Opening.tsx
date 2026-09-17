@@ -85,7 +85,7 @@ export function Opening({ force = false }: Props) {
   const indicatorRef = useRef<HTMLDivElement>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
   const boundaryRef = useRef(0)
-  const startedAt = useRef(performance.now())
+  const startedAt = useRef(0)
   const indicatorVisible = useRef(false)
 
   useHandoffResistance(lenis, boundaryRef)
@@ -132,6 +132,7 @@ export function Opening({ force = false }: Props) {
   // Leave the loader once assets are ready and the minimum has elapsed; never later than the maximum.
   useEffect(() => {
     if (phase !== 'loading') return
+    if (startedAt.current === 0) startedAt.current = performance.now()
     const elapsed = performance.now() - startedAt.current
     const wait = progress >= 1 ? Math.max(0, LOADER_MIN_MS - elapsed) : Math.max(0, LOADER_MAX_MS - elapsed)
     const timer = window.setTimeout(() => setPhase('clearing'), wait)
