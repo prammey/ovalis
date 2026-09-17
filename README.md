@@ -47,7 +47,9 @@ Put `<collection>-<finish>.webp` files in `public/colorways/` (e.g. `flores-suns
 2. **Clear.** Wordmark and rule fade out in 0.4s.
 3. **Navy fill.** A 300vw × 220vh navy plane anchored below the viewport rises with `translateY` while rotating from −9° to 0°. Transform only. The edge starts angled (right side higher, as in the storyboard) and levels out as the `power3.out` ease settles.
 4. **Invitation.** "Scroll" and an arrow on a slow 2.4s sine bounce. Fades on first scroll; returns if the user comes back to the very top.
-5. **Hero.** Pinned for 2.2 viewport heights, scrubbed with 0.6s smoothing, reversible. The render enters at 1.75× from the bottom-right and settles over 0–72% of the timeline; the type resolves over 8–90%. Each line is seven stacked copies clipped to horizontal bands, each translated up to 140px and dimmed, sliding back into alignment. Clip paths are static; only transform and opacity animate.
+5. **Hero.** Pinned for 2.2 viewport heights, scrubbed with 0.6s smoothing, reversible. At rest the navy field is empty: the type sits at opacity 0 and the render waits 40px below the bottom edge, so the only thing on screen is the scroll prompt. The render rises at 1.75× from the centre of the bottom edge and settles to the right of the type over 0–72% of the timeline; the type fades up and resolves over 8–90%. Each line is seven stacked copies clipped to horizontal bands, each translated up to 140px, sliding back into alignment; the outermost bands' clips bleed 40% past the line box so ascenders and the descender of "Age" stay whole. Clip paths are static; only transform and opacity animate.
+
+   The entry offset is measured at runtime against the section (exactly one viewport while pinned) instead of being hard-coded, so it centres correctly at any window size and across both breakpoints' different speaker placements. It is cached per section size and recomputed on refresh.
 6. **Handoff.** The pin releases and the navy scrolls off over the bone page. The navbar becomes visible at that moment but sits at a lower z-index than the hero, so the navy scrolling away literally reveals it. Scrolling back up meets resistance through Lenis's `virtualScroll` hook: within 8px of the boundary, upward wheel deltas are swallowed and the page nudges 14px to show tension. A sustained gesture (900px cumulative within 160ms gaps) or two hard flicks (>70px each within 1.4s) pass. It re-arms 240px back into the page. Off entirely under `prefers-reduced-motion`.
 
 ## What I improvised (the brief was silent or ambiguous)
@@ -62,6 +64,7 @@ Put `<collection>-<finish>.webp` files in `public/colorways/` (e.g. `flores-suns
 - **Glow spread.** "Blur radius about 1.4× the unit width" is implemented as a radial gradient whose diameter is 1.4× the container width with a soft falloff, rather than a `filter: blur()`, which would cost paint time on every cross-fade.
 - **Ambient tint strength** on the product page is 0.2 (mix of hue into bone) plus a pool of the hue at the top of the page. Pale finishes (White, Pearl) will always read faintly; that's the colour, not a bug.
 - **The silhouette caption** shows for every finish, not just placeholders, so the caption can't give away which ones have files. The hero and stages hide it.
+- **The silhouette retires once its render decodes.** It holds the frame while the image loads, then fades to opacity 0 over the same 0.7s. Leaving it lit showed its outline around the photo — a visible second unit, since the drawn shape is deliberately simpler than the render.
 - **Removed the Vite starter assets** (`App.css`, sample images, `icons.svg`) and replaced the favicon with the mark.
 - **Font correction** applied to the brief: body is Inter 300, mono is JetBrains Mono.
 

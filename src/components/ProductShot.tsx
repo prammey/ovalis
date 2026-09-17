@@ -98,8 +98,16 @@ function ShotLayer({ layer, priority, sizes }: { layer: Layer; priority: boolean
 
   return (
     <>
-      {/* silhouette always sits underneath; the render fades over it once decoded */}
-      <Silhouette colorway={layer.colorway} className="absolute inset-0 h-full w-full" />
+      {/* the silhouette holds the frame until the render decodes, then retires:
+          leaving it lit would show its outline around the photo, which reads as a second unit */}
+      <Silhouette
+        colorway={layer.colorway}
+        className="absolute inset-0 h-full w-full"
+        style={{
+          opacity: state === 'loaded' ? 0 : 1,
+          transition: `opacity ${CROSSFADE_MS}ms ${CROSSFADE_EASE_CSS}`,
+        }}
+      />
       {showImage && (
         <img
           src={layer.src}

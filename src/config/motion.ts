@@ -46,10 +46,16 @@ export const INDICATOR_OUT_MS = 300
 export const HERO_SCROLL_LENGTH_VH = 2.2
 /** Smoothing on the scrub; 0.6s lag makes wheel steps feel like one continuous motion. */
 export const HERO_SCRUB_S = 0.6
-/** Speaker start state: oversized from the bottom right, cropped by the viewport edge. Offsets are % of the speaker's own size. */
-export const HERO_SPEAKER_FROM = { xPercent: 32, yPercent: 42, scale: 1.75, rotate: -6 }
+/**
+ * Speaker start state: oversized and centred below the fold. Its x/y offsets
+ * are measured at runtime against the viewport (see Opening.tsx) rather than
+ * fixed here, so the entry lands the same on both breakpoints.
+ */
+export const HERO_SPEAKER_FROM = { scale: 1.75, rotate: -6 }
+/** How far below the viewport edge the speaker waits before the first scroll. Keeps the navy field blank. */
+export const HERO_SPEAKER_ENTER_GAP_PX = 40
 /** Speaker end state: settled to the right of the type, slightly overlapping it. */
-export const HERO_SPEAKER_TO = { xPercent: 0, yPercent: 0, scale: 1, rotate: 0 }
+export const HERO_SPEAKER_TO = { x: 0, y: 0, scale: 1, rotate: 0 }
 /** Portion of the pinned timeline (0..1) during which the speaker travels. Ends earlier than the type so the two move at different rates. */
 export const HERO_SPEAKER_WINDOW = { start: 0, end: 0.72 }
 /** Ease of the speaker's travel along the scrub. */
@@ -60,8 +66,10 @@ export const HERO_TEXT_WINDOW = { start: 0.08, end: 0.9 }
 export const HERO_TEXT_BANDS = 7
 /** Maximum horizontal displacement of a band at the distorted start state, in px. */
 export const HERO_TEXT_SHIFT_PX = 140
-/** Opacity of the type at its most distorted. */
-export const HERO_TEXT_FROM_OPACITY = 0.55
+/** How far the outermost bands' clips bleed past the line box, as % of its height. Keeps ascenders and the descender of "Age" whole. */
+export const HERO_TEXT_BLEED_PCT = 40
+/** Opacity of the type before the first scroll. Zero, so the navy field starts empty. */
+export const HERO_TEXT_FROM_OPACITY = 0
 /** Ease for each band's travel back to alignment. */
 export const HERO_TEXT_EASE = 'power3.out'
 

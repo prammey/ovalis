@@ -6,6 +6,7 @@ import {
   HERO_SCROLL_LENGTH_VH,
   HERO_SCRUB_S,
   HERO_SPEAKER_EASE,
+  HERO_SPEAKER_ENTER_GAP_PX,
   HERO_SPEAKER_FROM,
   HERO_SPEAKER_TO,
   HERO_SPEAKER_WINDOW,
@@ -221,6 +222,30 @@ export function Opening({ force = false }: Props) {
         gsap.to(indicator, { opacity: show ? 1 : 0, duration: (show ? INDICATOR_IN_MS : INDICATOR_OUT_MS) / 1000 })
       }
 
+      // Where the speaker waits before the first scroll: centred horizontally and
+      // just past the bottom edge. Measured against the section (exactly one
+      // viewport while pinned) rather than hard-coded, so it holds at any size
+      // and across the two breakpoints' different speaker placements. Cached
+      // per section size so a refresh costs one reflow, not one per tween value.
+      let entryCache: { w: number; h: number; x: number; y: number } | null = null
+      const entry = () => {
+        const s = section.getBoundingClientRect()
+        if (entryCache && entryCache.w === s.width && entryCache.h === s.height) return entryCache
+        const previous = speaker.style.transform
+        speaker.style.transform = 'none'
+        const r = speaker.getBoundingClientRect()
+        speaker.style.transform = previous
+        const centreX = r.left - s.left + r.width / 2
+        const centreY = r.top - s.top + r.height / 2
+        entryCache = {
+          w: s.width,
+          h: s.height,
+          x: s.width / 2 - centreX,
+          y: s.height + HERO_SPEAKER_ENTER_GAP_PX - (centreY - (r.height * HERO_SPEAKER_FROM.scale) / 2),
+        }
+        return entryCache
+      }
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
@@ -232,6 +257,7 @@ export function Opening({ force = false }: Props) {
           invalidateOnRefresh: true,
           onRefresh: (st) => {
             boundaryRef.current = st.end
+            entryCache = null
           },
           onUpdate: (st) => {
             if (st.progress > 0.02) setIndicator(false)
@@ -242,7 +268,7 @@ export function Opening({ force = false }: Props) {
 
       tl.fromTo(
         speaker,
-        HERO_SPEAKER_FROM,
+        { ...HERO_SPEAKER_FROM, x: () => entry().x, y: () => entry().y },
         { ...HERO_SPEAKER_TO, ease: HERO_SPEAKER_EASE, duration: HERO_SPEAKER_WINDOW.end - HERO_SPEAKER_WINDOW.start },
         HERO_SPEAKER_WINDOW.start,
       )

@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, type CSSProperties } from 'react'
 import type { Colorway } from '../data/colorways'
 import { darken, lighten, luminance, rgba } from '../lib/color'
 
@@ -6,14 +6,14 @@ import { darken, lighten, luminance, rgba } from '../lib/color'
 export const SHOT_WIDTH = 1492
 export const SHOT_HEIGHT = 1023
 
-type Props = { colorway: Colorway; className?: string }
+type Props = { colorway: Colorway; className?: string; style?: CSSProperties }
 
 /**
  * The drawn Luma-One: a tilted ellipse on a flared pedestal, filled in the
  * finish's own hex. Positioned to sit exactly where the render's silhouette
  * sits. Reads as an illustration, not as a missing asset.
  */
-export function Silhouette({ colorway, className }: Props) {
+export function Silhouette({ colorway, className, style }: Props) {
   const uid = useId().replace(/:/g, '')
   const { hex, materialType } = colorway
   const dark = luminance(hex) < 0.25
@@ -34,6 +34,7 @@ export function Silhouette({ colorway, className }: Props) {
     <svg
       viewBox={`0 0 ${SHOT_WIDTH} ${SHOT_HEIGHT}`}
       className={className}
+      style={style}
       role="img"
       aria-label={`Luma-One in ${colorway.name}`}
       preserveAspectRatio="xMidYMid meet"
