@@ -88,9 +88,14 @@ Put `<collection>-<finish>.webp` files in `public/colorways/` (e.g. `flores-suns
 - Every phase of the opening, the pill collapse, the dropdown, the selector's ambient response, the collections grid, the product page switch, and every test page were screenshotted in Chromium at 1440×900 during the build.
 - Both hero WebP files keep their alpha channel (VP8X alpha flag set). 1x screens fetch the 142 KB file.
 
+## Mobile
+
+Checked in a browser at 390×844 and 320×568. No horizontal scroll anywhere.
+
+The hero **stacks** below `md` rather than overlapping: there is not enough width for the type to sit beside a speaker large enough to read, and the overlapping desktop composition left only "New-A / No" visible. Type sits at 22% and the speaker at 48%, both at their own widths. The colorway dots put their collection label above rather than beside — beside, the label stole enough width to wrap a seven-finish row onto a second line and orphan a single dot — and each dot's tap target is padded out to 40px from its 22px visual. The navbar collapses to a menu sheet with the test pages divided off below a rule.
+
 ## Needs a second pass
 
-- **Mobile.** Layouts collapse to one column and the navbar has a menu sheet, but nothing below 768px has been looked at in a real browser. The hero type at 15vw and the speaker at 92vw will need tuning on phones.
 - **Navbar behind the hero at scroll 0.** Because the bar sits under the hero's z-index, it is unreachable while the navy covers the top. That's by design on the home page, but it means the home hero has no navigation until you scroll. If that's unwanted, raise the header's z-index and drop the "emerge from behind" effect.
 - **Navigation is exercised by clicking, not by URL.** Every navbar, dropdown, footer and card link was clicked in a real browser after the provider fix below. Worth keeping up: driving the site by `page.goto` alone hides dead links completely.
 - **The snap and lock were tuned with synthetic wheel events**, not a hand on a trackpad. The snap idle (140ms) and duration (0.8s), and the lock's charge (700px) and gesture gap (220ms), all live in `motion.ts`. A real trackpad's momentum tail is the thing most likely to want them adjusted — in particular, if the lock feels too easy to push through, raise `HANDOFF_LOCK_CHARGE_PX`.

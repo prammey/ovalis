@@ -325,7 +325,9 @@ export function Navbar() {
             </li>
           ))}
         </ul>
-        <p className="font-mono mt-6 text-[11px] tracking-[0.08em] text-slate">Test pages</p>
+        <p className="font-mono mt-7 border-t border-divider pt-6 text-[11px] tracking-[0.08em] text-slate">
+          Test pages
+        </p>
         <ul className="mt-2 flex flex-col gap-2 text-[15px] text-ink">
           {TEST_PAGES.map((t) => (
             <li key={t.to}>
