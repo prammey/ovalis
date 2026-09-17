@@ -126,7 +126,7 @@ export const GLOW_ALPHA_COOL = 0.28
 /** Glow blur radius as a multiple of the unit's width. */
 export const GLOW_BLUR_RATIO = 1.4
 /** Ambient page tint strength (0..1 mix of the hue into bone) on the product page. */
-export const AMBIENT_TINT_STRENGTH = 0.14
+export const AMBIENT_TINT_STRENGTH = 0.2
 /** Stage (rounded box) tint strength, slightly stronger than the page. */
 export const STAGE_TINT_STRENGTH = 0.22
 /** Max vertical drift of the product on scroll, in px. A few pixels, nothing showy. */
