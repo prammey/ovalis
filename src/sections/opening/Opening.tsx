@@ -5,9 +5,7 @@ import {
   CLEAR_MS,
   HERO_SCROLL_LENGTH_VH,
   HERO_EXIT_EASE,
-  HERO_EXIT_BAND_FADE,
   HERO_EXIT_TEXT_RISE_PX,
-  HERO_EXIT_TEXT_STAGGER,
   HERO_EXIT_WINDOW,
   HERO_SCRUB_S,
   HERO_SPEAKER_EASE,
@@ -16,9 +14,9 @@ import {
   HERO_SPEAKER_TO,
   HERO_SPEAKER_WINDOW,
   HERO_TEXT_EASE,
-  HERO_TEXT_BANDS,
-  HERO_TEXT_FROM_OPACITY,
-  HERO_TEXT_SHIFT_PX,
+  HERO_TEXT_ERASE_TRAVEL_PCT,
+  HERO_TEXT_LINE_STAGGER,
+  HERO_TEXT_REVEAL_TRAVEL_PCT,
   HERO_TEXT_WINDOW,
   INDICATOR_DELAY_MS,
   INDICATOR_IN_MS,
@@ -37,21 +35,12 @@ import { navbarStore } from '../../lib/navbar'
 import { useLenis } from '../../lib/smoothScroll'
 import { HERO_1X, HERO_SIZES, HERO_SRCSET, OPENED_KEY } from './hero'
 import { ScrollIndicator } from './ScrollIndicator'
-import { SlicedLine } from './SlicedLine'
+import { HeroLine } from './HeroLine'
 import { useAssetProgress } from './useAssetProgress'
 import { useHandoffLock } from './useHandoffLock'
 import { useHandoffSnap, type SnapZone } from './useHandoffSnap'
 
 type Phase = 'loading' | 'clearing' | 'hero'
-
-/** Per-band horizontal displacement at the distorted start, as a multiple of HERO_TEXT_SHIFT_PX. */
-const BAND_SHIFTS = [-1, 0.7, -0.45, 1, -0.8, 0.55, -0.35]
-
-function shiftFor(band: number, line: number): number {
-  const base = BAND_SHIFTS[band % BAND_SHIFTS.length]
-  // second line runs the pattern the other way so the two lines don't shear together
-  return (line % 2 === 0 ? base : -base) * HERO_TEXT_SHIFT_PX
-}
 
 function alreadyOpened(): boolean {
   try {
@@ -210,7 +199,9 @@ export function Opening({ force = false }: Props) {
     const indicator = indicatorRef.current
     if (!section || !speaker || !text || !sentinel || !indicator) return
 
-    const bands = Array.from(text.querySelectorAll<HTMLElement>('[data-band]'))
+    const lines = Array.from(text.querySelectorAll<HTMLElement>('[data-line]'))
+    const curtains = (kind: 'reveal' | 'erase') =>
+      lines.map((line) => line.querySelector<HTMLElement>(`[data-curtain="${kind}"]`)!)
 
     const ctx = gsap.context(() => {
       // The handoff: from the pin releasing (sentinel enters at the bottom) to
@@ -239,7 +230,8 @@ export function Opening({ force = false }: Props) {
 
       if (reduced) {
         gsap.set(speaker, HERO_SPEAKER_TO)
-        gsap.set(bands, { x: 0, opacity: 1 })
+        gsap.set(curtains('reveal'), { yPercent: HERO_TEXT_REVEAL_TRAVEL_PCT })
+        gsap.set(curtains('erase'), { yPercent: 0 })
         createHandoff()
         ScrollTrigger.refresh()
         return
@@ -300,42 +292,38 @@ export function Opening({ force = false }: Props) {
         { ...HERO_SPEAKER_TO, ease: HERO_SPEAKER_EASE, duration: HERO_SPEAKER_WINDOW.end - HERO_SPEAKER_WINDOW.start },
         HERO_SPEAKER_WINDOW.start,
       )
-      bands.forEach((band) => {
-        const i = Number(band.dataset.band ?? 0)
-        const line = Number(band.closest<HTMLElement>('[data-line]')?.dataset.line ?? 0)
+      const lineStagger = HERO_TEXT_LINE_STAGGER
+      const spread = lineStagger * Math.max(0, lines.length - 1)
+      const revealDuration = HERO_TEXT_WINDOW.end - HERO_TEXT_WINDOW.start - spread
+
+      curtains('reveal').forEach((curtain, index) => {
         tl.fromTo(
-          band,
-          { x: shiftFor(i, line), opacity: HERO_TEXT_FROM_OPACITY },
-          { x: 0, opacity: 1, ease: HERO_TEXT_EASE, duration: HERO_TEXT_WINDOW.end - HERO_TEXT_WINDOW.start },
-          HERO_TEXT_WINDOW.start,
+          curtain,
+          { yPercent: 0 },
+          { yPercent: HERO_TEXT_REVEAL_TRAVEL_PCT, ease: HERO_TEXT_EASE, duration: revealDuration },
+          HERO_TEXT_WINDOW.start + index * lineStagger,
         )
       })
 
-      // The exit. The type is taken away a band at a time from the bottom up,
-      // so the letters keep their tops and are cut flat below — the
-      // storyboard's last two frames. The block lifts as a whole; only the
-      // bands' opacity is staggered, which is what keeps the cut edge hard
-      // instead of greying the whole word. The speaker holds where it settled
-      // and leaves with the panel, so it is never adrift on its own.
+      // The exit mirrors the entrance: the erase curtain sweeps up over each
+      // line in turn, so the type empties from the bottom through the same
+      // soft gradient it filled through. The block lifts a little as it goes.
+      // The speaker holds where it settled and leaves with the panel, so it is
+      // never adrift on its own.
       const exitSpan = HERO_EXIT_WINDOW.end - HERO_EXIT_WINDOW.start
-      const bandFade = Math.min(HERO_EXIT_BAND_FADE, exitSpan / HERO_TEXT_BANDS)
-      const exitStagger = Math.min(
-        HERO_EXIT_TEXT_STAGGER,
-        (exitSpan - bandFade) / Math.max(1, HERO_TEXT_BANDS - 1),
-      )
+      const eraseDuration = exitSpan - spread
 
       tl.to(
         text,
         { y: -HERO_EXIT_TEXT_RISE_PX, ease: HERO_EXIT_EASE, duration: exitSpan },
         HERO_EXIT_WINDOW.start,
       )
-      bands.forEach((band) => {
-        const i = Number(band.dataset.band ?? 0)
-        const fromBottom = HERO_TEXT_BANDS - 1 - i
-        tl.to(
-          band,
-          { opacity: 0, ease: 'none', duration: bandFade },
-          HERO_EXIT_WINDOW.start + fromBottom * exitStagger,
+      curtains('erase').forEach((curtain, index) => {
+        tl.fromTo(
+          curtain,
+          { yPercent: 0 },
+          { yPercent: HERO_TEXT_ERASE_TRAVEL_PCT, ease: HERO_EXIT_EASE, duration: eraseDuration },
+          HERO_EXIT_WINDOW.start + index * lineStagger,
         )
       })
 
@@ -388,10 +376,10 @@ export function Opening({ force = false }: Props) {
               style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144' }}
             >
               <div data-line={0}>
-                <SlicedLine text="New-Age" />
+                <HeroLine text="New-Age" />
               </div>
               <div data-line={1}>
-                <SlicedLine text="Noise" />
+                <HeroLine text="Noise" />
               </div>
             </div>
           </div>

@@ -62,16 +62,22 @@ export const HERO_SPEAKER_WINDOW = { start: 0, end: 0.55 }
 export const HERO_SPEAKER_EASE = 'power2.out'
 /** Portion of the pinned timeline during which the sliced type resolves. */
 export const HERO_TEXT_WINDOW = { start: 0.06, end: 0.62 }
-/** How many horizontal bands each hero line is sliced into for the resolve effect. */
-export const HERO_TEXT_BANDS = 7
-/** Maximum horizontal displacement of a band at the distorted start state, in px. */
-export const HERO_TEXT_SHIFT_PX = 140
-/** How far the outermost bands' clips bleed past the line box, as % of its height. Keeps ascenders and the descender of "Age" whole. */
-export const HERO_TEXT_BLEED_PCT = 40
-/** Opacity of the type before the first scroll. Zero, so the navy field starts empty. */
-export const HERO_TEXT_FROM_OPACITY = 0
-/** Ease for each band's travel back to alignment. */
-export const HERO_TEXT_EASE = 'power3.out'
+/**
+ * The type fades in and out behind navy "curtains" that slide up over it.
+ * These two stops describe one curtain's gradient, as a percentage of its own
+ * height: solid navy up to the first, fully transparent by the second. The
+ * span between them is the softness of the fade — widen it for a gentler edge.
+ */
+export const HERO_TEXT_CURTAIN_SOLID_PCT = 70
+export const HERO_TEXT_CURTAIN_CLEAR_PCT = 90
+/** How far the reveal curtain travels to clear the line, as % of its own height. */
+export const HERO_TEXT_REVEAL_TRAVEL_PCT = -62
+/** How far the erase curtain travels to cover it. */
+export const HERO_TEXT_ERASE_TRAVEL_PCT = -70
+/** Delay between the two lines, in timeline units, so they arrive and leave one after the other. */
+export const HERO_TEXT_LINE_STAGGER = 0.06
+/** Ease of the reveal. */
+export const HERO_TEXT_EASE = 'power2.out'
 
 // ---------------------------------------------------------------------------
 // Hero exit — the type is taken away as the scroll carries past it
@@ -88,18 +94,7 @@ export const HERO_EXIT_WINDOW = { start: 0.72, end: 1 }
 export const HERO_EXIT_EASE = 'power1.in'
 /** How far the whole block of type lifts as it leaves, in px. */
 export const HERO_EXIT_TEXT_RISE_PX = 130
-/**
- * Delay between neighbouring bands leaving, in timeline units. The bottom band
- * goes first, so the type is eaten upward.
- */
-export const HERO_EXIT_TEXT_STAGGER = 0.038
-/**
- * How long one band takes to go. Kept short against the stagger so roughly one
- * band is mid-fade at a time: the edge stays a hard cut travelling up the
- * letterforms, the way the storyboard draws it, rather than the whole word
- * going translucent at once.
- */
-export const HERO_EXIT_BAND_FADE = 0.05
+
 
 // ---------------------------------------------------------------------------
 // Handoff lock (the home top holds against scrolling back up)
