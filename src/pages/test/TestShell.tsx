@@ -13,7 +13,7 @@ type Props = {
 export function TestShell({ title, note, dark = false, children }: Props) {
   return (
     <main className={`min-h-svh ${dark ? 'bg-ink text-bone' : 'bg-bone text-ink'}`}>
-      <header className="flex items-baseline justify-between px-6 pt-8 md:px-12">
+      <header className="flex items-baseline justify-between px-6 pt-24 md:px-12">
         <div className="font-mono text-[11px] tracking-[0.08em] text-slate">
           test / {title}
           {note && <span className="ml-4 hidden md:inline">{note}</span>}
