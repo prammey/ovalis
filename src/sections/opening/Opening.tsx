@@ -4,6 +4,13 @@ import { Wordmark } from '../../components/Wordmark'
 import {
   CLEAR_MS,
   HERO_SCROLL_LENGTH_VH,
+  HERO_EXIT_EASE,
+  HERO_EXIT_SPEAKER_RISE_VH,
+  HERO_EXIT_SPEAKER_SCALE,
+  HERO_EXIT_BAND_FADE,
+  HERO_EXIT_TEXT_RISE_PX,
+  HERO_EXIT_TEXT_STAGGER,
+  HERO_EXIT_WINDOW,
   HERO_SCRUB_S,
   HERO_SPEAKER_EASE,
   HERO_SPEAKER_ENTER_GAP_PX,
@@ -11,6 +18,7 @@ import {
   HERO_SPEAKER_TO,
   HERO_SPEAKER_WINDOW,
   HERO_TEXT_EASE,
+  HERO_TEXT_BANDS,
   HERO_TEXT_FROM_OPACITY,
   HERO_TEXT_SHIFT_PX,
   HERO_TEXT_WINDOW,
@@ -248,7 +256,7 @@ export function Opening({ force = false }: Props) {
       // viewport while pinned) rather than hard-coded, so it holds at any size
       // and across the two breakpoints' different speaker placements. Cached
       // per section size so a refresh costs one reflow, not one per tween value.
-      let entryCache: { w: number; h: number; x: number; y: number } | null = null
+      let entryCache: { w: number; h: number; x: number; y: number; viewportHeight: number } | null = null
       const entry = () => {
         const s = section.getBoundingClientRect()
         if (entryCache && entryCache.w === s.width && entryCache.h === s.height) return entryCache
@@ -261,6 +269,7 @@ export function Opening({ force = false }: Props) {
         entryCache = {
           w: s.width,
           h: s.height,
+          viewportHeight: s.height,
           x: s.width / 2 - centreX,
           y: s.height + HERO_SPEAKER_ENTER_GAP_PX - (centreY - (r.height * HERO_SPEAKER_FROM.scale) / 2),
         }
@@ -302,6 +311,44 @@ export function Opening({ force = false }: Props) {
           HERO_TEXT_WINDOW.start,
         )
       })
+
+      // The exit. The speaker rises out through the top while the type is taken
+      // away a band at a time from the bottom up, so the letters keep their
+      // tops and are cut flat below — the storyboard's last two frames. The
+      // block lifts as a whole; only the bands' opacity is staggered, which is
+      // what keeps the cut edge hard instead of greying the whole word.
+      const exitSpan = HERO_EXIT_WINDOW.end - HERO_EXIT_WINDOW.start
+      const bandFade = Math.min(HERO_EXIT_BAND_FADE, exitSpan / HERO_TEXT_BANDS)
+      const exitStagger = Math.min(
+        HERO_EXIT_TEXT_STAGGER,
+        (exitSpan - bandFade) / Math.max(1, HERO_TEXT_BANDS - 1),
+      )
+
+      tl.to(
+        speaker,
+        {
+          y: () => -entry().viewportHeight * HERO_EXIT_SPEAKER_RISE_VH,
+          scale: HERO_EXIT_SPEAKER_SCALE,
+          ease: HERO_EXIT_EASE,
+          duration: exitSpan,
+        },
+        HERO_EXIT_WINDOW.start,
+      )
+      tl.to(
+        text,
+        { y: -HERO_EXIT_TEXT_RISE_PX, ease: HERO_EXIT_EASE, duration: exitSpan },
+        HERO_EXIT_WINDOW.start,
+      )
+      bands.forEach((band) => {
+        const i = Number(band.dataset.band ?? 0)
+        const fromBottom = HERO_TEXT_BANDS - 1 - i
+        tl.to(
+          band,
+          { opacity: 0, ease: 'none', duration: bandFade },
+          HERO_EXIT_WINDOW.start + fromBottom * exitStagger,
+        )
+      })
+
       tl.set({}, {}, 1)
 
       createHandoff()
@@ -344,10 +391,10 @@ export function Opening({ force = false }: Props) {
         aria-label="Luma-One. New-Age Noise."
       >
         <div className="absolute inset-0">
-          <div className="absolute left-[7vw] top-1/2 -translate-y-[54%]">
+          <div className="absolute left-[6vw] top-1/2 -translate-y-[54%]">
             <div
               ref={textRef}
-              className="font-display italic text-[clamp(4.5rem,15vw,17rem)] leading-[0.94]"
+              className="font-display italic text-[clamp(5rem,17vw,19rem)] leading-[0.92]"
               style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144' }}
             >
               <div data-line={0}>
@@ -358,7 +405,7 @@ export function Opening({ force = false }: Props) {
               </div>
             </div>
           </div>
-          <div className="absolute right-[3vw] top-1/2 w-[52vw] -translate-y-[42%] max-md:right-[-8vw] max-md:w-[92vw]">
+          <div className="absolute right-[0vw] top-1/2 w-[58vw] -translate-y-[44%] max-md:right-[-10vw] max-md:w-[104vw]">
             <div ref={speakerRef} style={{ willChange: 'transform' }}>
               <ProductShot
                 colorway="foundations-navy"

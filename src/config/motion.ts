@@ -56,12 +56,12 @@ export const HERO_SPEAKER_FROM = { scale: 1.75, rotate: -6 }
 export const HERO_SPEAKER_ENTER_GAP_PX = 40
 /** Speaker end state: settled to the right of the type, slightly overlapping it. */
 export const HERO_SPEAKER_TO = { x: 0, y: 0, scale: 1, rotate: 0 }
-/** Portion of the pinned timeline (0..1) during which the speaker travels. Ends earlier than the type so the two move at different rates. */
-export const HERO_SPEAKER_WINDOW = { start: 0, end: 0.72 }
+/** Portion of the pinned timeline (0..1) during which the speaker travels in. Ends earlier than the type so the two move at different rates. */
+export const HERO_SPEAKER_WINDOW = { start: 0, end: 0.55 }
 /** Ease of the speaker's travel along the scrub. */
 export const HERO_SPEAKER_EASE = 'power2.out'
 /** Portion of the pinned timeline during which the sliced type resolves. */
-export const HERO_TEXT_WINDOW = { start: 0.08, end: 0.9 }
+export const HERO_TEXT_WINDOW = { start: 0.06, end: 0.62 }
 /** How many horizontal bands each hero line is sliced into for the resolve effect. */
 export const HERO_TEXT_BANDS = 7
 /** Maximum horizontal displacement of a band at the distorted start state, in px. */
@@ -72,6 +72,33 @@ export const HERO_TEXT_BLEED_PCT = 40
 export const HERO_TEXT_FROM_OPACITY = 0
 /** Ease for each band's travel back to alignment. */
 export const HERO_TEXT_EASE = 'power3.out'
+
+// ---------------------------------------------------------------------------
+// Hero exit — the composition lifts up and away as the scroll carries past it
+// ---------------------------------------------------------------------------
+
+/** Portion of the pinned timeline given to the exit. The gap after the entrance is the beat the finished frame holds for. */
+export const HERO_EXIT_WINDOW = { start: 0.72, end: 1 }
+/** How far the speaker rises on its way out, as a multiple of viewport height. Enough to clear the top edge entirely. */
+export const HERO_EXIT_SPEAKER_RISE_VH = 1.25
+/** The speaker grows a little as it rises, so it reads as passing the camera rather than shrinking into the distance. */
+export const HERO_EXIT_SPEAKER_SCALE = 1.12
+/** Ease of the exit. Mild, because the user is driving it by scrolling. */
+export const HERO_EXIT_EASE = 'power1.in'
+/** How far the whole block of type lifts as it leaves, in px. */
+export const HERO_EXIT_TEXT_RISE_PX = 130
+/**
+ * Delay between neighbouring bands leaving, in timeline units. The bottom band
+ * goes first, so the type is eaten upward.
+ */
+export const HERO_EXIT_TEXT_STAGGER = 0.038
+/**
+ * How long one band takes to go. Kept short against the stagger so roughly one
+ * band is mid-fade at a time: the edge stays a hard cut travelling up the
+ * letterforms, the way the storyboard draws it, rather than the whole word
+ * going translucent at once.
+ */
+export const HERO_EXIT_BAND_FADE = 0.05
 
 // ---------------------------------------------------------------------------
 // Handoff lock (the home top holds against scrolling back up)
