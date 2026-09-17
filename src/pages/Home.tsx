@@ -1,3 +1,4 @@
+import { Footer } from '../components/Footer'
 import { Opening } from '../sections/opening/Opening'
 
 export function Home() {
@@ -5,6 +6,7 @@ export function Home() {
     <>
       <Opening />
       <main className="min-h-[150svh] bg-bone" />
+      <Footer />
     </>
   )
 }

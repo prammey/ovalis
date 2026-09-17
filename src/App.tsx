@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { GrainOverlay } from './components/GrainOverlay'
+import { Navbar } from './components/Navbar'
 import { PageTransitions } from './lib/navigation'
 import { ScrollReset, SmoothScrollProvider } from './lib/smoothScroll'
 import { Home } from './pages/Home'
@@ -13,6 +14,7 @@ export default function App() {
       <SmoothScrollProvider>
         <ScrollReset />
         <GrainOverlay />
+        <Navbar />
         <PageTransitions>
           <Routes>
             <Route path="/" element={<Home />} />

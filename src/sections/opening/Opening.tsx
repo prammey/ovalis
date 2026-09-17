@@ -198,10 +198,11 @@ export function Opening({ force = false }: Props) {
     const bands = Array.from(text.querySelectorAll<HTMLElement>('[data-band]'))
 
     const ctx = gsap.context(() => {
-      // navbar descends from behind the navy as the panel releases
+      // navbar descends the moment the pin releases; it sits behind the navy
+      // (lower z-index) so the panel scrolling off reveals it
       ScrollTrigger.create({
         trigger: sentinel,
-        start: 'top 96px',
+        start: 'top bottom',
         onEnter: () => navbarStore.set({ visible: true }),
         onLeaveBack: () => navbarStore.set({ visible: false }),
       })

@@ -48,13 +48,7 @@ export function PageTransitions({ children }: { children: ReactNode }) {
 
   return (
     <NavigateContext.Provider value={go}>
-      <div
-        key={pathname}
-        className="page-enter"
-        style={{ animationDuration: `${PAGE_FADE_IN_MS}ms`, animationTimingFunction: PAGE_FADE_EASE_CSS }}
-      >
-        {children}
-      </div>
+      <PageEnter key={pathname}>{children}</PageEnter>
       <div
         aria-hidden
         className="fixed inset-0 z-40 bg-bone"
@@ -65,6 +59,24 @@ export function PageTransitions({ children }: { children: ReactNode }) {
         }}
       />
     </NavigateContext.Provider>
+  )
+}
+
+/**
+ * Fades the new page in, then removes the animation. A filled opacity
+ * animation would keep a stacking context on this wrapper and trap the
+ * hero's z-index beneath the fixed navbar.
+ */
+function PageEnter({ children }: { children: ReactNode }) {
+  const [entered, setEntered] = useState(false)
+  return (
+    <div
+      className={entered ? undefined : 'page-enter'}
+      style={entered ? undefined : { animationDuration: `${PAGE_FADE_IN_MS}ms`, animationTimingFunction: PAGE_FADE_EASE_CSS }}
+      onAnimationEnd={() => setEntered(true)}
+    >
+      {children}
+    </div>
   )
 }
 
