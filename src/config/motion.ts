@@ -74,15 +74,16 @@ export const HERO_TEXT_FROM_OPACITY = 0
 export const HERO_TEXT_EASE = 'power3.out'
 
 // ---------------------------------------------------------------------------
-// Hero exit — the composition lifts up and away as the scroll carries past it
+// Hero exit — the type is taken away as the scroll carries past it
 // ---------------------------------------------------------------------------
 
 /** Portion of the pinned timeline given to the exit. The gap after the entrance is the beat the finished frame holds for. */
 export const HERO_EXIT_WINDOW = { start: 0.72, end: 1 }
-/** How far the speaker rises on its way out, as a multiple of viewport height. Enough to clear the top edge entirely. */
-export const HERO_EXIT_SPEAKER_RISE_VH = 1.25
-/** The speaker grows a little as it rises, so it reads as passing the camera rather than shrinking into the distance. */
-export const HERO_EXIT_SPEAKER_SCALE = 1.12
+/**
+ * The speaker has no exit of its own: it holds where it settled and leaves
+ * only when the pinned section itself scrolls away. The storyboard's rising
+ * speaker is that panel moving, not a separate animation.
+ */
 /** Ease of the exit. Mild, because the user is driving it by scrolling. */
 export const HERO_EXIT_EASE = 'power1.in'
 /** How far the whole block of type lifts as it leaves, in px. */

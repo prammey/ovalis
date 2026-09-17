@@ -5,8 +5,6 @@ import {
   CLEAR_MS,
   HERO_SCROLL_LENGTH_VH,
   HERO_EXIT_EASE,
-  HERO_EXIT_SPEAKER_RISE_VH,
-  HERO_EXIT_SPEAKER_SCALE,
   HERO_EXIT_BAND_FADE,
   HERO_EXIT_TEXT_RISE_PX,
   HERO_EXIT_TEXT_STAGGER,
@@ -256,7 +254,7 @@ export function Opening({ force = false }: Props) {
       // viewport while pinned) rather than hard-coded, so it holds at any size
       // and across the two breakpoints' different speaker placements. Cached
       // per section size so a refresh costs one reflow, not one per tween value.
-      let entryCache: { w: number; h: number; x: number; y: number; viewportHeight: number } | null = null
+      let entryCache: { w: number; h: number; x: number; y: number } | null = null
       const entry = () => {
         const s = section.getBoundingClientRect()
         if (entryCache && entryCache.w === s.width && entryCache.h === s.height) return entryCache
@@ -269,7 +267,6 @@ export function Opening({ force = false }: Props) {
         entryCache = {
           w: s.width,
           h: s.height,
-          viewportHeight: s.height,
           x: s.width / 2 - centreX,
           y: s.height + HERO_SPEAKER_ENTER_GAP_PX - (centreY - (r.height * HERO_SPEAKER_FROM.scale) / 2),
         }
@@ -312,11 +309,12 @@ export function Opening({ force = false }: Props) {
         )
       })
 
-      // The exit. The speaker rises out through the top while the type is taken
-      // away a band at a time from the bottom up, so the letters keep their
-      // tops and are cut flat below — the storyboard's last two frames. The
-      // block lifts as a whole; only the bands' opacity is staggered, which is
-      // what keeps the cut edge hard instead of greying the whole word.
+      // The exit. The type is taken away a band at a time from the bottom up,
+      // so the letters keep their tops and are cut flat below — the
+      // storyboard's last two frames. The block lifts as a whole; only the
+      // bands' opacity is staggered, which is what keeps the cut edge hard
+      // instead of greying the whole word. The speaker holds where it settled
+      // and leaves with the panel, so it is never adrift on its own.
       const exitSpan = HERO_EXIT_WINDOW.end - HERO_EXIT_WINDOW.start
       const bandFade = Math.min(HERO_EXIT_BAND_FADE, exitSpan / HERO_TEXT_BANDS)
       const exitStagger = Math.min(
@@ -324,16 +322,6 @@ export function Opening({ force = false }: Props) {
         (exitSpan - bandFade) / Math.max(1, HERO_TEXT_BANDS - 1),
       )
 
-      tl.to(
-        speaker,
-        {
-          y: () => -entry().viewportHeight * HERO_EXIT_SPEAKER_RISE_VH,
-          scale: HERO_EXIT_SPEAKER_SCALE,
-          ease: HERO_EXIT_EASE,
-          duration: exitSpan,
-        },
-        HERO_EXIT_WINDOW.start,
-      )
       tl.to(
         text,
         { y: -HERO_EXIT_TEXT_RISE_PX, ease: HERO_EXIT_EASE, duration: exitSpan },
@@ -405,7 +393,7 @@ export function Opening({ force = false }: Props) {
               </div>
             </div>
           </div>
-          <div className="absolute right-[0vw] top-1/2 w-[58vw] -translate-y-[44%] max-md:right-[-10vw] max-md:w-[104vw]">
+          <div className="absolute right-[3vw] top-1/2 w-[58vw] -translate-y-[44%] max-md:right-[-10vw] max-md:w-[104vw]">
             <div ref={speakerRef} style={{ willChange: 'transform' }}>
               <ProductShot
                 colorway="foundations-navy"
