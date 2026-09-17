@@ -11,6 +11,7 @@ import {
 import { Link, useLocation, useNavigate, type LinkProps } from 'react-router-dom'
 import { PAGE_FADE_EASE_CSS, PAGE_FADE_IN_MS, PAGE_FADE_OUT_MS } from '../config/motion'
 import { useReducedMotion } from '../hooks/useReducedMotion'
+import { routeKey } from './routes'
 
 type Go = (to: string) => void
 
@@ -30,7 +31,7 @@ export function PageTransitions({ children }: { children: ReactNode }) {
   const go = useCallback<Go>(
     (to) => {
       if (to === pathname) return
-      if (reduced) {
+      if (reduced || routeKey(to) === routeKey(pathname)) {
         navigate(to)
         return
       }
@@ -48,7 +49,7 @@ export function PageTransitions({ children }: { children: ReactNode }) {
 
   return (
     <NavigateContext.Provider value={go}>
-      <PageEnter key={pathname}>{children}</PageEnter>
+      <PageEnter key={routeKey(pathname)}>{children}</PageEnter>
       <div
         aria-hidden
         className="fixed inset-0 z-40 bg-bone"

@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom'
 import { LENIS_LERP, LENIS_WHEEL_MULTIPLIER } from '../config/motion'
 import { prefersReducedMotion } from '../hooks/useReducedMotion'
 import { gsap, ScrollTrigger } from './gsap'
+import { routeKey } from './routes'
 
 /**
  * A gate sees every wheel/touch delta before Lenis applies it. Returning
@@ -55,15 +56,25 @@ export function useLenis(): Lenis | null {
   return useContext(LenisContext)
 }
 
-/** Jumps to the top on route change and lets ScrollTrigger re-measure the new page. */
+/**
+ * Jumps to the top on route change (or to the hash target, if any) and lets
+ * ScrollTrigger re-measure the new page. A parameter-only change within the
+ * same route group keeps the scroll position.
+ */
 export function ScrollReset() {
   const lenis = useLenis()
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
+  const key = routeKey(pathname)
   useEffect(() => {
-    if (lenis) lenis.scrollTo(0, { immediate: true, force: true })
+    const target = hash ? document.querySelector<HTMLElement>(hash) : null
+    if (target) {
+      const y = target.getBoundingClientRect().top + window.scrollY - 96
+      if (lenis) lenis.scrollTo(y, { immediate: true, force: true })
+      else window.scrollTo(0, y)
+    } else if (lenis) lenis.scrollTo(0, { immediate: true, force: true })
     else window.scrollTo(0, 0)
     const id = requestAnimationFrame(() => ScrollTrigger.refresh())
     return () => cancelAnimationFrame(id)
-  }, [pathname, lenis])
+  }, [key, hash, lenis])
   return null
 }
