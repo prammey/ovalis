@@ -63,17 +63,24 @@ export const HERO_SPEAKER_EASE = 'power2.out'
 /** Portion of the pinned timeline during which the sliced type resolves. */
 export const HERO_TEXT_WINDOW = { start: 0.06, end: 0.62 }
 /**
- * The type fades in and out behind navy "curtains" that slide up over it.
- * These two stops describe one curtain's gradient, as a percentage of its own
- * height: solid navy up to the first, fully transparent by the second. The
- * span between them is the softness of the fade — widen it for a gentler edge.
+ * The reveal and erase sweeps, as a fraction of each line's masked box measured
+ * from its bottom edge. The reveal runs past 1 so the type ends fully lit; the
+ * erase starts below 0 so it begins fully lit.
  */
-export const HERO_TEXT_CURTAIN_SOLID_PCT = 70
-export const HERO_TEXT_CURTAIN_CLEAR_PCT = 90
-/** How far the reveal curtain travels to clear the line, as % of its own height. */
-export const HERO_TEXT_REVEAL_TRAVEL_PCT = -62
-/** How far the erase curtain travels to cover it. */
-export const HERO_TEXT_ERASE_TRAVEL_PCT = -70
+export const HERO_TEXT_REVEAL_FROM = 0
+export const HERO_TEXT_REVEAL_TO = 1.2
+export const HERO_TEXT_ERASE_FROM = -0.25
+export const HERO_TEXT_ERASE_TO = 1.2
+/** Softness of the sweep's edge, as % of the masked box. The whole point of the effect. */
+export const HERO_TEXT_MASK_SOFT_PCT = 20
+/**
+ * How far each line's mask extends past its line box, in em. The italic "g" of
+ * "Age" hangs about 0.16em below the box, so the mask must reach past it or the
+ * descender is cut off. Masks only affect their own element's pixels, so
+ * neighbouring lines' masks may overlap freely — which they must here, since at
+ * leading 0.92 the two lines' glyphs genuinely share vertical space.
+ */
+export const HERO_TEXT_MASK_BLEED_EM = 0.25
 /** Delay between the two lines, in timeline units, so they arrive and leave one after the other. */
 export const HERO_TEXT_LINE_STAGGER = 0.06
 /** Ease of the reveal. */

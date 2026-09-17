@@ -14,9 +14,11 @@ import {
   HERO_SPEAKER_TO,
   HERO_SPEAKER_WINDOW,
   HERO_TEXT_EASE,
-  HERO_TEXT_ERASE_TRAVEL_PCT,
+  HERO_TEXT_ERASE_FROM,
+  HERO_TEXT_ERASE_TO,
   HERO_TEXT_LINE_STAGGER,
-  HERO_TEXT_REVEAL_TRAVEL_PCT,
+  HERO_TEXT_REVEAL_FROM,
+  HERO_TEXT_REVEAL_TO,
   HERO_TEXT_WINDOW,
   INDICATOR_DELAY_MS,
   INDICATOR_IN_MS,
@@ -200,8 +202,8 @@ export function Opening({ force = false }: Props) {
     if (!section || !speaker || !text || !sentinel || !indicator) return
 
     const lines = Array.from(text.querySelectorAll<HTMLElement>('[data-line]'))
-    const curtains = (kind: 'reveal' | 'erase') =>
-      lines.map((line) => line.querySelector<HTMLElement>(`[data-curtain="${kind}"]`)!)
+    const sweeps = (kind: 'reveal' | 'erase') =>
+      lines.map((line) => line.querySelector<HTMLElement>(`[data-sweep="${kind}"]`)!)
 
     const ctx = gsap.context(() => {
       // The handoff: from the pin releasing (sentinel enters at the bottom) to
@@ -230,8 +232,8 @@ export function Opening({ force = false }: Props) {
 
       if (reduced) {
         gsap.set(speaker, HERO_SPEAKER_TO)
-        gsap.set(curtains('reveal'), { yPercent: HERO_TEXT_REVEAL_TRAVEL_PCT })
-        gsap.set(curtains('erase'), { yPercent: 0 })
+        gsap.set(sweeps('reveal'), { '--reveal': HERO_TEXT_REVEAL_TO })
+        gsap.set(sweeps('erase'), { '--erase': HERO_TEXT_ERASE_FROM })
         createHandoff()
         ScrollTrigger.refresh()
         return
@@ -296,18 +298,18 @@ export function Opening({ force = false }: Props) {
       const spread = lineStagger * Math.max(0, lines.length - 1)
       const revealDuration = HERO_TEXT_WINDOW.end - HERO_TEXT_WINDOW.start - spread
 
-      curtains('reveal').forEach((curtain, index) => {
+      sweeps('reveal').forEach((sweep, index) => {
         tl.fromTo(
-          curtain,
-          { yPercent: 0 },
-          { yPercent: HERO_TEXT_REVEAL_TRAVEL_PCT, ease: HERO_TEXT_EASE, duration: revealDuration },
+          sweep,
+          { '--reveal': HERO_TEXT_REVEAL_FROM },
+          { '--reveal': HERO_TEXT_REVEAL_TO, ease: HERO_TEXT_EASE, duration: revealDuration },
           HERO_TEXT_WINDOW.start + index * lineStagger,
         )
       })
 
-      // The exit mirrors the entrance: the erase curtain sweeps up over each
-      // line in turn, so the type empties from the bottom through the same
-      // soft gradient it filled through. The block lifts a little as it goes.
+      // The exit mirrors the entrance: the erase sweep rises through each line
+      // in turn, so the type empties from the bottom through the same soft
+      // gradient edge it filled through. The block lifts a little as it goes.
       // The speaker holds where it settled and leaves with the panel, so it is
       // never adrift on its own.
       const exitSpan = HERO_EXIT_WINDOW.end - HERO_EXIT_WINDOW.start
@@ -318,11 +320,11 @@ export function Opening({ force = false }: Props) {
         { y: -HERO_EXIT_TEXT_RISE_PX, ease: HERO_EXIT_EASE, duration: exitSpan },
         HERO_EXIT_WINDOW.start,
       )
-      curtains('erase').forEach((curtain, index) => {
+      sweeps('erase').forEach((sweep, index) => {
         tl.fromTo(
-          curtain,
-          { yPercent: 0 },
-          { yPercent: HERO_TEXT_ERASE_TRAVEL_PCT, ease: HERO_EXIT_EASE, duration: eraseDuration },
+          sweep,
+          { '--erase': HERO_TEXT_ERASE_FROM },
+          { '--erase': HERO_TEXT_ERASE_TO, ease: HERO_EXIT_EASE, duration: eraseDuration },
           HERO_EXIT_WINDOW.start + index * lineStagger,
         )
       })

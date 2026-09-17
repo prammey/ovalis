@@ -1,45 +1,50 @@
+import type { CSSProperties } from 'react'
 import {
-  HERO_TEXT_CURTAIN_CLEAR_PCT,
-  HERO_TEXT_CURTAIN_SOLID_PCT,
+  HERO_TEXT_ERASE_FROM,
+  HERO_TEXT_MASK_BLEED_EM,
+  HERO_TEXT_MASK_SOFT_PCT,
+  HERO_TEXT_REVEAL_FROM,
 } from '../../config/motion'
 
 /**
- * One hero line, revealed and later erased by two navy "curtains" that slide
- * up over it. Each curtain is a gradient from solid navy to transparent, so
- * its leading edge is soft: the line fades in and out through a gradient
- * rather than being cut.
+ * One hero line, filled and then emptied by a soft gradient edge sweeping up
+ * from the bottom.
  *
- * The curtains are painted once and moved with `transform` alone, which keeps
- * the whole effect on the compositor — animating a mask or a gradient stop
- * would repaint the type every frame.
+ * Each sweep is a `mask-image` gradient driven by a CSS custom property that
+ * the timeline animates. An earlier version slid opaque navy panels over the
+ * type instead — cheaper to composite, but a panel covers whatever it overlaps,
+ * and at this leading the descender of "Age" shares vertical space with the
+ * line below, so the neighbouring panel cropped it. A mask only ever affects
+ * its own element's pixels, so the lines may overlap as much as the type needs.
  *
- * Geometry: each curtain is three line-heights tall and offset so that at rest
- * the reveal curtain sits solidly over the line and the erase curtain sits
- * just below it. Both travel upward, so the line fills and empties from the
- * bottom up. The line box carries padding (cancelled by an equal negative
- * margin, so spacing is unchanged) to give descenders room inside the
- * `overflow: hidden` that clips the curtains to this line alone.
+ * Both wrappers are bled past the line box (cancelled by an equal negative
+ * margin, so the leading is unchanged) to bring descenders inside the masked
+ * area. One mask per element, so reveal and erase are nested rather than merged.
  */
 export function HeroLine({ text }: { text: string }) {
-  const solid = `var(--navy) 0%, var(--navy) ${HERO_TEXT_CURTAIN_SOLID_PCT}%`
-  const clear = `transparent ${HERO_TEXT_CURTAIN_CLEAR_PCT}%`
-  const curtain = 'pointer-events-none absolute left-[-6%] right-[-6%] h-[300%]'
+  const soft = HERO_TEXT_MASK_SOFT_PCT
+  // Opaque below the edge, clear above it: the line fills from the bottom up.
+  const revealMask = `linear-gradient(to top, #000 calc(var(--reveal) * 100% - ${soft}%), transparent calc(var(--reveal) * 100%))`
+  // The mirror — clear below the edge, opaque above — so it empties the same way.
+  const eraseMask = `linear-gradient(to top, transparent calc(var(--erase) * 100%), #000 calc(var(--erase) * 100% + ${soft}%))`
+
+  const layer = (mask: string, variable: string, value: number): CSSProperties => ({
+    paddingTop: `${HERO_TEXT_MASK_BLEED_EM}em`,
+    paddingBottom: `${HERO_TEXT_MASK_BLEED_EM}em`,
+    marginTop: `-${HERO_TEXT_MASK_BLEED_EM}em`,
+    marginBottom: `-${HERO_TEXT_MASK_BLEED_EM}em`,
+    [variable]: value,
+    WebkitMaskImage: mask,
+    maskImage: mask,
+    WebkitMaskRepeat: 'no-repeat',
+    maskRepeat: 'no-repeat',
+  })
 
   return (
-    <span className="relative block overflow-hidden py-[0.22em] my-[-0.22em]">
-      <span className="block">{text}</span>
-      <span
-        aria-hidden
-        data-curtain="reveal"
-        className={`${curtain} top-[-100%]`}
-        style={{ background: `linear-gradient(to bottom, ${solid}, ${clear})`, willChange: 'transform' }}
-      />
-      <span
-        aria-hidden
-        data-curtain="erase"
-        className={`${curtain} top-full`}
-        style={{ background: `linear-gradient(to top, ${solid}, ${clear})`, willChange: 'transform' }}
-      />
+    <span data-sweep="erase" className="block" style={layer(eraseMask, '--erase', HERO_TEXT_ERASE_FROM)}>
+      <span data-sweep="reveal" className="block" style={layer(revealMask, '--reveal', HERO_TEXT_REVEAL_FROM)}>
+        {text}
+      </span>
     </span>
   )
 }
