@@ -33,6 +33,7 @@ import { HERO_1X, HERO_SIZES, HERO_SRCSET, OPENED_KEY } from './hero'
 import { ScrollIndicator } from './ScrollIndicator'
 import { SlicedLine } from './SlicedLine'
 import { useAssetProgress } from './useAssetProgress'
+import { useHandoffLock } from './useHandoffLock'
 import { useHandoffSnap, type SnapZone } from './useHandoffSnap'
 
 type Phase = 'loading' | 'clearing' | 'hero'
@@ -69,7 +70,7 @@ type Props = {
 
 /**
  * The opening sequence: load → clear → navy fill → invitation → scroll-driven
- * hero → handoff to the bone page beneath, which snaps into place.
+ * hero → handoff to the bone page beneath, which snaps into place and holds.
  */
 export function Opening({ force = false }: Props) {
   const lenis = useLenis()
@@ -87,10 +88,13 @@ export function Opening({ force = false }: Props) {
   const sentinelRef = useRef<HTMLDivElement>(null)
   /** From the pin releasing to the home top (navy fully gone, bar docked): the navy scroll-off, which snaps forward to the home top. */
   const zoneRef = useRef<SnapZone>({ start: 0, end: 0 })
+  /** The home top, which holds against scrolling back up into the opening. */
+  const lockRef = useRef(0)
   const startedAt = useRef(0)
   const indicatorVisible = useRef(false)
 
   useHandoffSnap(lenis, zoneRef)
+  useHandoffLock(lenis, lockRef)
 
   // Scroll is locked until the navy has filled.
   useEffect(() => {
@@ -211,6 +215,7 @@ export function Opening({ force = false }: Props) {
       const createHandoff = () => {
         const sync = (st: ScrollTrigger) => {
           zoneRef.current = { start: st.start, end: st.end }
+          lockRef.current = st.end
           navbarStore.set({ top: st.end })
         }
         const handoff = ScrollTrigger.create({

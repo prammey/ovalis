@@ -74,6 +74,26 @@ export const HERO_TEXT_FROM_OPACITY = 0
 export const HERO_TEXT_EASE = 'power3.out'
 
 // ---------------------------------------------------------------------------
+// Handoff lock (the home top holds against scrolling back up)
+// ---------------------------------------------------------------------------
+
+/** Cumulative upward delta (px) within one gesture needed to pass the lock into the hero. */
+export const HANDOFF_LOCK_CHARGE_PX = 700
+/**
+ * Which gesture at the lock is allowed to charge through. Magnitude alone
+ * cannot tell a hard fling from a deliberate push — a fling clears any
+ * threshold in two events — so the gesture that arrives at the lock is
+ * absorbed and only the next one counts.
+ */
+export const HANDOFF_LOCK_GESTURES_TO_PASS = 2
+/** A pause this long ends the current gesture: the charge resets, and a fling that has just landed on the lock stops counting. */
+export const HANDOFF_LOCK_GESTURE_GAP_MS = 220
+/** Tolerance for "sitting on the lock", in px. */
+export const HANDOFF_LOCK_EPS_PX = 2
+/** After passing, the user must get this far above the lock before returning to it re-arms it. Stops a release from being cancelled on the spot. */
+export const HANDOFF_LOCK_REARM_PX = 24
+
+// ---------------------------------------------------------------------------
 // Handoff snap (between the hero releasing and the home top)
 // ---------------------------------------------------------------------------
 
