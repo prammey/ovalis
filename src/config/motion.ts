@@ -89,8 +89,20 @@ export const RESISTANCE_HARD_FLICK_PX = 70
 export const RESISTANCE_HARD_FLICK_COUNT = 2
 /** Window in which those hard flicks must occur. */
 export const RESISTANCE_HARD_FLICK_WINDOW_MS = 1400
-/** Once through, the gate re-arms only after the user scrolls this far back down into the home content. */
-export const RESISTANCE_REARM_PX = 240
+/** Once through, the gate re-arms as soon as the user is this far back below the home top. */
+export const RESISTANCE_REARM_PX = 24
+
+// ---------------------------------------------------------------------------
+// Handoff snap (between the hero releasing and the home top)
+// ---------------------------------------------------------------------------
+
+/** Idle time after the last scroll movement before the page settles to an end of the navy scroll-off zone. */
+export const HANDOFF_SNAP_IDLE_MS = 140
+/** Duration of that settle. */
+export const HANDOFF_SNAP_S = 0.8
+/** Ease of the settle (cubic in-out), as a Lenis easing function. */
+export const HANDOFF_SNAP_EASING = (t: number): number =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 /** Bump the page gives on a resisted wheel event (px), so the gate reads as tension rather than a wall. */
 export const RESISTANCE_NUDGE_PX = 14
 /** Duration of that nudge and its return. */
@@ -103,8 +115,14 @@ export const RESISTANCE_NUDGE_MS = 220
 /** Descent of the full bar when it first appears from behind the navy. */
 export const NAVBAR_DESCEND_MS = 900
 export const NAVBAR_DESCEND_EASE = 'power3.out'
-/** Scroll depth (px) below which the bar never collapses. */
+/** Distance (px) below a page's top within which the bar stays docked — rectangular and full-width — and never collapses. On the home page the "top" is where the navy has fully scrolled off. */
 export const NAVBAR_COLLAPSE_AFTER_PX = 120
+/** Height of the docked, full-width bar. */
+export const NAVBAR_DOCKED_HEIGHT_PX = 72
+/** Inset of the floating bar from the top and sides once undocked. The floating bar's height is the docked height minus this. */
+export const NAVBAR_FLOAT_INSET_PX = 16
+/** Widest the floating bar (and the content inside the docked one) will go. */
+export const NAVBAR_MAX_WIDTH_PX = 1120
 /** Downward scroll distance (px) that triggers the collapse. */
 export const NAVBAR_COLLAPSE_DELTA_PX = 24
 /** Upward scroll distance (px) that expands the bar again. Small on purpose — "scrolling up slightly anywhere". */

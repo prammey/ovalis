@@ -12,6 +12,7 @@ import {
   RESISTANCE_ZONE_PX,
 } from '../../config/motion'
 import { prefersReducedMotion } from '../../hooks/useReducedMotion'
+import { gsap } from '../../lib/gsap'
 import { registerScrollGate } from '../../lib/smoothScroll'
 
 /**
@@ -20,7 +21,10 @@ import { registerScrollGate } from '../../lib/smoothScroll'
  * Only wheel/trackpad input is gated; keyboard and touch scroll natively and
  * are never trapped. Off entirely under prefers-reduced-motion.
  *
- * `boundaryRef` holds the scroll position where the hero hands off.
+ * `boundaryRef` holds the home top: the scroll position where the navy has
+ * fully left and the bar is docked. Each resisted event nudges the page up a
+ * few pixels, showing a sliver of navy, so the gate reads as tension rather
+ * than a wall.
  */
 export function useHandoffResistance(lenis: Lenis | null, boundaryRef: RefObject<number>) {
   useEffect(() => {
@@ -31,20 +35,26 @@ export function useHandoffResistance(lenis: Lenis | null, boundaryRef: RefObject
     let flicks: number[] = []
     let passed = false
     let nudging = false
+    let nudgeTween: gsap.core.Tween | null = null
 
+    // Out and back, driven by a GSAP proxy that writes positions directly.
+    // Chaining Lenis's own scrollTo calls proved unreliable for the return leg.
     const nudge = () => {
       if (nudging) return
       nudging = true
       const boundary = boundaryRef.current
-      lenis.scrollTo(boundary - RESISTANCE_NUDGE_PX, {
+      const proxy = { y: boundary }
+      nudgeTween = gsap.to(proxy, {
+        y: boundary - RESISTANCE_NUDGE_PX,
         duration: RESISTANCE_NUDGE_MS / 1000,
-        onComplete: () =>
-          lenis.scrollTo(boundary, {
-            duration: RESISTANCE_NUDGE_MS / 1000,
-            onComplete: () => {
-              nudging = false
-            },
-          }),
+        ease: 'power2.out',
+        yoyo: true,
+        repeat: 1,
+        onUpdate: () => lenis.scrollTo(proxy.y, { immediate: true, force: true }),
+        onComplete: () => {
+          lenis.scrollTo(boundary, { immediate: true, force: true })
+          nudging = false
+        },
       })
     }
 
@@ -72,6 +82,9 @@ export function useHandoffResistance(lenis: Lenis | null, boundaryRef: RefObject
       flicks = flicks.filter((t) => now - t < RESISTANCE_HARD_FLICK_WINDOW_MS)
 
       if (sustained >= RESISTANCE_SUSTAINED_PX || flicks.length >= RESISTANCE_HARD_FLICK_COUNT) {
+        // an in-flight nudge would keep writing positions over the scroll we are about to allow
+        nudgeTween?.kill()
+        nudging = false
         passed = true
         return true
       }
@@ -79,6 +92,9 @@ export function useHandoffResistance(lenis: Lenis | null, boundaryRef: RefObject
       return false
     })
 
-    return unregister
+    return () => {
+      nudgeTween?.kill()
+      unregister()
+    }
   }, [lenis, boundaryRef])
 }

@@ -34,6 +34,7 @@ import { ScrollIndicator } from './ScrollIndicator'
 import { SlicedLine } from './SlicedLine'
 import { useAssetProgress } from './useAssetProgress'
 import { useHandoffResistance } from './useHandoffResistance'
+import { useHandoffSnap, type SnapZone } from './useHandoffSnap'
 
 type Phase = 'loading' | 'clearing' | 'hero'
 
@@ -85,11 +86,15 @@ export function Opening({ force = false }: Props) {
   const textRef = useRef<HTMLDivElement>(null)
   const indicatorRef = useRef<HTMLDivElement>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
+  /** Scroll position of the home top: navy fully gone, bar docked. Resistance gates here. */
   const boundaryRef = useRef(0)
+  /** From the pin releasing to the home top: the navy scroll-off, which snaps to either end. */
+  const zoneRef = useRef<SnapZone>({ start: 0, end: 0 })
   const startedAt = useRef(0)
   const indicatorVisible = useRef(false)
 
   useHandoffResistance(lenis, boundaryRef)
+  useHandoffSnap(lenis, zoneRef)
 
   // Scroll is locked until the navy has filled.
   useEffect(() => {
@@ -102,7 +107,7 @@ export function Opening({ force = false }: Props) {
   // Navbar stays behind the navy until the hero hands off.
   useEffect(() => {
     navbarStore.set({ visible: false })
-    return () => navbarStore.set({ visible: true })
+    return () => navbarStore.set({ visible: true, top: 0 })
   }, [])
 
   // Phase 1: wordmark fades up; the rule tracks real progress.
@@ -200,19 +205,35 @@ export function Opening({ force = false }: Props) {
     const bands = Array.from(text.querySelectorAll<HTMLElement>('[data-band]'))
 
     const ctx = gsap.context(() => {
-      // navbar descends the moment the pin releases; it sits behind the navy
-      // (lower z-index) so the panel scrolling off reveals it
-      ScrollTrigger.create({
-        trigger: sentinel,
-        start: 'top bottom',
-        onEnter: () => navbarStore.set({ visible: true }),
-        onLeaveBack: () => navbarStore.set({ visible: false }),
-      })
+      // The handoff: from the pin releasing (sentinel enters at the bottom) to
+      // the navy fully gone (sentinel reaches the top). The navbar becomes
+      // visible at the start of it but sits behind the navy (lower z-index),
+      // so the panel scrolling off reveals the docked bar; its top edge meets
+      // the viewport top exactly at the end, which is where the page snaps to
+      // and where scrolling back up meets resistance. Created after the pin so
+      // it measures the sentinel with the pin spacer already in the layout.
+      const createHandoff = () => {
+        const sync = (st: ScrollTrigger) => {
+          zoneRef.current = { start: st.start, end: st.end }
+          boundaryRef.current = st.end
+          navbarStore.set({ top: st.end })
+        }
+        const handoff = ScrollTrigger.create({
+          trigger: sentinel,
+          start: 'top bottom',
+          end: 'top top',
+          onEnter: () => navbarStore.set({ visible: true }),
+          onLeaveBack: () => navbarStore.set({ visible: false }),
+          onRefresh: sync,
+        })
+        sync(handoff)
+      }
 
       if (reduced) {
         gsap.set(speaker, HERO_SPEAKER_TO)
         gsap.set(bands, { x: 0, opacity: 1 })
-        boundaryRef.current = 0
+        createHandoff()
+        ScrollTrigger.refresh()
         return
       }
 
@@ -255,8 +276,7 @@ export function Opening({ force = false }: Props) {
           scrub: HERO_SCRUB_S,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          onRefresh: (st) => {
-            boundaryRef.current = st.end
+          onRefresh: () => {
             entryCache = null
           },
           onUpdate: (st) => {
@@ -283,6 +303,9 @@ export function Opening({ force = false }: Props) {
         )
       })
       tl.set({}, {}, 1)
+
+      createHandoff()
+      ScrollTrigger.refresh()
     }, section)
 
     return () => ctx.revert()

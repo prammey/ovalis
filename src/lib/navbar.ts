@@ -3,9 +3,11 @@ import { useSyncExternalStore } from 'react'
 type NavbarState = {
   /** False while the navy hero covers the top of the page. */
   visible: boolean
+  /** Scroll position the bar treats as the top of the page: 0 everywhere except the home page, where it is the point the navy has fully scrolled off. */
+  top: number
 }
 
-let state: NavbarState = { visible: true }
+let state: NavbarState = { visible: true, top: 0 }
 const listeners = new Set<() => void>()
 
 export const navbarStore = {
