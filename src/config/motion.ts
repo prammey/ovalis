@@ -74,39 +74,16 @@ export const HERO_TEXT_FROM_OPACITY = 0
 export const HERO_TEXT_EASE = 'power3.out'
 
 // ---------------------------------------------------------------------------
-// Handoff resistance (phase 6)
-// ---------------------------------------------------------------------------
-
-/** Distance above the hero/home boundary (px) within which upward wheel input is gated. */
-export const RESISTANCE_ZONE_PX = 8
-/** Cumulative upward wheel delta (px) that counts as a deliberate, sustained gesture. */
-export const RESISTANCE_SUSTAINED_PX = 900
-/** Wheel events further apart than this reset the sustained accumulator. */
-export const RESISTANCE_GESTURE_GAP_MS = 160
-/** A single wheel event with |deltaY| above this counts as a "hard" flick. */
-export const RESISTANCE_HARD_FLICK_PX = 70
-/** Number of hard flicks that let the user through regardless of sustain. */
-export const RESISTANCE_HARD_FLICK_COUNT = 2
-/** Window in which those hard flicks must occur. */
-export const RESISTANCE_HARD_FLICK_WINDOW_MS = 1400
-/** Once through, the gate re-arms as soon as the user is this far back below the home top. */
-export const RESISTANCE_REARM_PX = 24
-
-// ---------------------------------------------------------------------------
 // Handoff snap (between the hero releasing and the home top)
 // ---------------------------------------------------------------------------
 
-/** Idle time after the last scroll movement before the page settles to an end of the navy scroll-off zone. */
+/** Idle time after the last downward scroll movement before the page settles forward to the home top. */
 export const HANDOFF_SNAP_IDLE_MS = 140
 /** Duration of that settle. */
 export const HANDOFF_SNAP_S = 0.8
 /** Ease of the settle (cubic in-out), as a Lenis easing function. */
 export const HANDOFF_SNAP_EASING = (t: number): number =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
-/** Bump the page gives on a resisted wheel event (px), so the gate reads as tension rather than a wall. */
-export const RESISTANCE_NUDGE_PX = 14
-/** Duration of that nudge and its return. */
-export const RESISTANCE_NUDGE_MS = 220
 
 // ---------------------------------------------------------------------------
 // Navbar

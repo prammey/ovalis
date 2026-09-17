@@ -7,9 +7,10 @@ export type SnapZone = { start: number; end: number }
 
 /**
  * The stretch where the navy scrolls off over the home page has no resting
- * state of its own. When scrolling stops inside it, the page settles to the
- * end it was heading for: down goes to the home top (navy gone, bar docked),
- * up goes back to the hero's final frame. Done through Lenis so it never
+ * state of its own. When scrolling stops inside it while heading down, the
+ * page settles forward to the home top (navy gone, bar docked). Heading up is
+ * left alone: the navy scrolls back on and the hero reverses under the user's
+ * own hand, with nothing pulling either way. Done through Lenis so it never
  * fights the smoothing; user input during a settle simply takes over.
  */
 export function useHandoffSnap(lenis: Lenis | null, zoneRef: RefObject<SnapZone>) {
@@ -24,8 +25,8 @@ export function useHandoffSnap(lenis: Lenis | null, zoneRef: RefObject<SnapZone>
       const { start, end } = zoneRef.current
       if (end <= start) return
       const y = lenis.targetScroll
-      if (y <= start + 1 || y >= end - 1) return
-      lenis.scrollTo(direction < 0 ? start : end, { duration: HANDOFF_SNAP_S, easing: HANDOFF_SNAP_EASING })
+      if (direction <= 0 || y <= start + 1 || y >= end - 1) return
+      lenis.scrollTo(end, { duration: HANDOFF_SNAP_S, easing: HANDOFF_SNAP_EASING })
     }
 
     const onScroll = () => {

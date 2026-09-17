@@ -33,7 +33,6 @@ import { HERO_1X, HERO_SIZES, HERO_SRCSET, OPENED_KEY } from './hero'
 import { ScrollIndicator } from './ScrollIndicator'
 import { SlicedLine } from './SlicedLine'
 import { useAssetProgress } from './useAssetProgress'
-import { useHandoffResistance } from './useHandoffResistance'
 import { useHandoffSnap, type SnapZone } from './useHandoffSnap'
 
 type Phase = 'loading' | 'clearing' | 'hero'
@@ -70,7 +69,7 @@ type Props = {
 
 /**
  * The opening sequence: load → clear → navy fill → invitation → scroll-driven
- * hero → handoff to the bone page beneath, with resistance on the way back up.
+ * hero → handoff to the bone page beneath, which snaps into place.
  */
 export function Opening({ force = false }: Props) {
   const lenis = useLenis()
@@ -86,14 +85,11 @@ export function Opening({ force = false }: Props) {
   const textRef = useRef<HTMLDivElement>(null)
   const indicatorRef = useRef<HTMLDivElement>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
-  /** Scroll position of the home top: navy fully gone, bar docked. Resistance gates here. */
-  const boundaryRef = useRef(0)
-  /** From the pin releasing to the home top: the navy scroll-off, which snaps to either end. */
+  /** From the pin releasing to the home top (navy fully gone, bar docked): the navy scroll-off, which snaps forward to the home top. */
   const zoneRef = useRef<SnapZone>({ start: 0, end: 0 })
   const startedAt = useRef(0)
   const indicatorVisible = useRef(false)
 
-  useHandoffResistance(lenis, boundaryRef)
   useHandoffSnap(lenis, zoneRef)
 
   // Scroll is locked until the navy has filled.
@@ -209,13 +205,12 @@ export function Opening({ force = false }: Props) {
       // the navy fully gone (sentinel reaches the top). The navbar becomes
       // visible at the start of it but sits behind the navy (lower z-index),
       // so the panel scrolling off reveals the docked bar; its top edge meets
-      // the viewport top exactly at the end, which is where the page snaps to
-      // and where scrolling back up meets resistance. Created after the pin so
-      // it measures the sentinel with the pin spacer already in the layout.
+      // the viewport top exactly at the end, which is where the page snaps to.
+      // Created after the pin so it measures the sentinel with the pin spacer
+      // already in the layout.
       const createHandoff = () => {
         const sync = (st: ScrollTrigger) => {
           zoneRef.current = { start: st.start, end: st.end }
-          boundaryRef.current = st.end
           navbarStore.set({ top: st.end })
         }
         const handoff = ScrollTrigger.create({
