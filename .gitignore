@@ -23,5 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 
-# Source render — superseded by public/herospeaker.webp
-herospeaker.png
+# Source renders — masters for the WebP exports in public/
+assets-src/

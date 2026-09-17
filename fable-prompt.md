@@ -11,11 +11,11 @@ Nothing here is a real product. Do not write spec-sheet marketing copy about aud
 Read these first. They determine the whole architecture.
 
 - **No 3D. No Three.js, no WebGL, no React Three Fiber.** The product is presented entirely through pre-rendered transparent PNG/WebP images. Do not add a 3D library for any reason.
-- **Exactly one real render exists right now:** `/public/herospeaker.webp`, used on the landing page. It is a transparent-background studio shot of the speaker facing right with the pedestal sweeping left. It **must** keep its alpha channel — it sits on a navy field, so any format without transparency (JPEG) would render as a white box. If you find it with a `.jpg` extension, stop and say so rather than building around it.
+- **Exactly one real render exists right now**, exported at two widths from a single master: `/public/herospeaker.webp` (1492×1023, the 2x/Retina asset) and `/public/herospeaker@1x.webp` (900×617, the 1x asset). Serve them through a `srcset` so standard displays fetch the 1x file and Retina displays fetch the full-width one. Both are used on the landing page. The render is a transparent-background studio shot of the speaker facing right with the pedestal sweeping left. Both files **must** keep their alpha channel — it sits on a navy field, so any format without transparency (JPEG) would render as a white box. If you find it with a `.jpg` extension, stop and say so rather than building around it.
 - **All eighteen other finishes are placeholders for now.** They will be dropped in later at `/public/colorways/<collection>-<finish>.webp` (e.g. `flores-sunshine.webp`). Until then the site must look finished and intentional — see "The placeholder" below. Do not special-case the navy image: route it through the same component as everything else, so the others become real by adding files and changing no code.
 - Everything else visual is SVG or CSS. Do not reference external image URLs, and never leave a broken-image icon anywhere.
 - **Stack:** Vite + React + TypeScript. GSAP with ScrollTrigger for scroll choreography. Lenis for smooth scroll. Tailwind for layout. React Router for pages. Nothing else.
-- **Performance floor:** 60fps on any laptop. Animate only `transform` and `opacity`. Serve WebP, lazy-load below the fold, and keep the hero image under 300 KB.
+- **Performance floor:** 60fps on any laptop. Animate only `transform` and `opacity`. Serve WebP, lazy-load below the fold, and keep the hero image standard displays actually fetch under 300 KB — the 1x asset is 142 KB; the full-width Retina asset is 404 KB and is only ever requested by 2x screens. Do not downscale the master to chase a byte target; add a `srcset` step instead.
 - **Accessibility floor:** visible keyboard focus everywhere, `prefers-reduced-motion` honored (motion becomes instant state changes, never disappears), all interactive elements reachable by tab, alt text or aria-labels on every meaningful visual.
 
 ---
@@ -78,7 +78,7 @@ This is the most important thing on the site. Build it precisely.
 
 **Phase 4 — Invitation.** A scroll indicator appears on the navy field. Arrow bounces slowly and smoothly, long easing, nothing jittery. It fades out the moment the user begins scrolling.
 
-**Phase 5 — Scroll-driven hero.** Scrubbed to scroll position, reversible in both directions. Use `<ProductShot colorway="foundations-navy" src="/herospeaker.webp" />` — the one real render — positioned and driven purely by CSS transforms — translate, scale, rotate — with GSAP scrubbing them against scroll.
+**Phase 5 — Scroll-driven hero.** Scrubbed to scroll position, reversible in both directions. Use `<ProductShot colorway="foundations-navy" src="/herospeaker@1x.webp" srcSet="/herospeaker@1x.webp 900w, /herospeaker.webp 1492w" />` — the one real render — positioned and driven purely by CSS transforms — translate, scale, rotate — with GSAP scrubbing them against scroll.
 - The Luma-One enters oversized from the bottom-right, cropped by the viewport edge, then scales down and settles to sit over the type.
 - `New-Age` / `Noise` set in Fraunces italic, mint on navy, two lines, large. The letterforms resolve from a distorted state into clean type as scroll advances — start with heavy horizontal displacement or a clip-path reveal that reads as the letters assembling. The storyboard shows them mid-resolve; match that feel.
 - Speaker and type share the scroll timeline but move at different rates.
@@ -93,7 +93,7 @@ This is the most important thing on the site. Build it precisely.
 
 Build one component, `<ProductShot colorway={...} />`, used for every appearance of the product anywhere on the site — the landing page included. It resolves a source in this order: an explicit `src` prop, then `/colorways/<collection>-<finish>.webp`, then the drawn placeholder.
 
-Today only the landing page passes an explicit src (`/herospeaker.webp`, the Midnight Navy shot). All nineteen colorway slots fall through to placeholders, including `foundations-navy` on its own product page. That is expected. Those pages must still look deliberate.
+Today only the landing page passes an explicit src (the Midnight Navy shot, as the `herospeaker` 1x/2x `srcset` pair above). `<ProductShot>` therefore accepts an optional `srcSet` alongside `src`; when the remaining colorway renders arrive they should be exported at the same two widths and passed the same way. All nineteen colorway slots fall through to placeholders, including `foundations-navy` on its own product page. That is expected. Those pages must still look deliberate.
 
 The fallback is an inline SVG of the product's silhouette: a tilted ellipse on a flared pedestal foot, filled in that colorway's own hex, with a slightly darker inset ellipse for the grille and a soft highlight along the upper-left rim. Same aspect ratio and same position as a real render, so nothing reflows when images arrive. Add a small Geist Mono caption beneath in `--slate` reading the finish name.
 
